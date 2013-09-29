@@ -8,7 +8,6 @@ defmodule Cerberus do
   end
 
   defp calculate_avg_response_time(results) do
-    IO.inspect results
     reducer = fn (result, acc) ->
       { time, _response_code } = result
       acc + time
@@ -16,14 +15,16 @@ defmodule Cerberus do
     Enum.reduce(results, 0, reducer) / Enum.count(results)
   end
 
-  def calculate_response_codes(results) do
-    all_codes = Enum.map results, fn result ->
+  defp calculate_response_codes(results) do
+    all_codes(results) |> Enum.uniq |> Enum.map fn code ->
+      { code, Enum.count(all_codes(results), &(&1 == code)) }
+    end
+  end
+
+  def all_codes(results) do
+    Enum.map results, fn result ->
       { _time, response_code } = result
       response_code
-    end
-    uniq_codes = Enum.uniq all_codes
-    Enum.map uniq_codes, fn code ->
-      { code, Enum.count(all_codes, fn c -> c == code end) }
     end
   end
 
@@ -40,9 +41,7 @@ defmodule Cerberus do
     acc
   end
   def do_run(n, verb, url, concurrent_workers, acc) do
-    IO.puts "Spawning"
     pool = spawn_workers(concurrent_workers)
-    IO.puts "Spawning done"
     busy_workers = make_concurrent_requests(verb, url, pool, [])
     responses = List.flatten collect_responses(busy_workers, [])
     do_run(n - Enum.count(responses), verb, url, concurrent_workers, [responses|acc])
@@ -100,4 +99,3 @@ defmodule Cerberus do
   defp write_content_to_file(_content) do
   end
 end
-
