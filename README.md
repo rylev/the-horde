@@ -7,7 +7,8 @@ Horde is a utility program for making testing web applications at scale à la
 
 In order to control the Horde you will need:
 
-* Ruby 1.9.3 or higher
+* The Horde Executable
+* Erlang
 * An AWS account
 
 ## WARNING
